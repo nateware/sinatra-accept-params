@@ -4,11 +4,11 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "sinatra-acceptparams"
+    gem.name = "sinatra-accept-params"
     gem.summary = %Q{Parameter whitelisting for Sinatra}
     gem.description = %Q{Parameter whitelisting for Sinatra.  Provides validation, defaults, and post-processing.}
     gem.email = "nate@wiger.org"
-    gem.homepage = "http://github.com/nateware/sinatra-acceptparams"
+    gem.homepage = "http://github.com/nateware/sinatra-accept-params"
     gem.authors = ["Nate Wiger"]
     gem.add_development_dependency "bacon", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
@@ -47,7 +47,7 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "sinatra-acceptparams #{version}"
+  rdoc.title = "sinatra-accept-params #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
