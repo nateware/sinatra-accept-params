@@ -163,8 +163,9 @@ module Sinatra
           # kinda hacky to get it to display correctly
           unless settings[:ignore_unexpected]
             basename   = canonical_name
-            canonicals = unexpected_keys.collect{|k| basename.empty? ? k : basename + "[#{k}]"}.join(', ')
-            raise UnexpectedParam, "Request included unexpected parameter(s): #{canonicals}"
+            canonicals = unexpected_keys.sort.collect{|k| basename.empty? ? k : basename + "[#{k}]"}.join(', ')
+            s = unexpected_keys.length == 1 ? '' : 's'
+            raise UnexpectedParam, "Request included unexpected parameter#{s}: #{canonicals}"
           end
           unexpected_keys.each{|k| params.delete(k)} if settings[:remove_unexpected]
         end
@@ -340,7 +341,7 @@ module Sinatra
             when /^(0|false|FALSE|F|N)$/
               false
             else
-              raise InvalidParamValue, "Could not typecast boolean to appropriate value"
+              raise InvalidParamValue, "Could not typecast boolean value '#{value.to_s}' to true or false"
             end
           end
         when :binary, :array, :file

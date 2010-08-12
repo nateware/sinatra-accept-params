@@ -8,3 +8,7 @@ require 'sinatra'
 require 'sinatra/accept_params'
 
 Bacon.summary_on_exit
+
+def params_dump
+  params.keys.sort.collect{|k| "#{k}=#{params[k]}"} * '; '
+end

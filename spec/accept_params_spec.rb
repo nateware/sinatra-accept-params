@@ -5,27 +5,25 @@ class Application < Sinatra::Base
 
   set :raise_errors, false
   set :show_exceptions, false
-  # Have to enumerate errors, because Sinatra uses is_a? test, not inheritance
-  [ Sinatra::AcceptParams::ParamError,
-    Sinatra::AcceptParams::NoParamsDefined,
-    Sinatra::AcceptParams::MissingParam,
-    Sinatra::AcceptParams::UnexpectedParam,
-    Sinatra::AcceptParams::InvalidParamType,
-    Sinatra::AcceptParams::InvalidParamValue,
-    Sinatra::AcceptParams::SslRequired,
-    Sinatra::AcceptParams::LoginRequired ].each do |cl|
-    error cl do
-      halt 400, 'bad params'
-    end
-  end
 
   get '/search' do
     accept_params do |p|
-      p.integer :limit, :default => 20
+      p.integer :page, :default => 1, :minvalue => 1
+      p.integer :limit, :default => 20, :maxvalue => 100
+      p.boolean :wildcard, :default => false
       p.string :search, :required => true
+      p.float :timeout, :default => 3.5
     end
+    params_dump
   end
-
+  
+  get '/users' do
+    accept_no_params
+  end
+  
+  get '/posts/:id' do
+    accept_only_id
+  end
 end
 
 class Bacon::Context
@@ -76,8 +74,57 @@ describe "Sinatra::AcceptParams" do
   it "should handle accept_params blocks" do
     get '/search'
     last_response.status.should == 400
+    last_response.body.should == %q(Request params missing required parameter 'search')
+
+    get '/search', :page => 'Yes'
+    last_response.status.should == 400
+    last_response.body.should == %q(Value for parameter 'page' (Yes) is of the wrong type (expected integer))
+
+    get '/search', :wildcard => 15
+    last_response.status.should == 400
+    last_response.body.should == %q(Value for parameter 'wildcard' (15) is of the wrong type (expected boolean))
+
+    get '/search', :page => 0
+    last_response.status.should == 400
+    last_response.body.should == %q(Value for parameter 'page' (0) is less than minimum value (1))
+
+    get '/search', :limit => 900000
+    last_response.status.should == 400
+    last_response.body.should == %q(Value for parameter 'limit' (900000) is more than maximum value (100))
 
     get '/search', :search => 'foot'
+    last_response.status.should == 200
+    last_response.body.should == "limit=20; page=1; search=foot; timeout=3.5; wildcard=false"
+
+    get '/search', :search => 'taco grande', :wildcard => 'true'
+    last_response.status.should == 200
+    last_response.body.should == "limit=20; page=1; search=taco grande; timeout=3.5; wildcard=true"
+
+    get '/search', :limit => 100, :wildcard => 0, :search => 'string', :timeout => '19.2433'
+    last_response.status.should == 200
+    last_response.body.should == "limit=100; page=1; search=string; timeout=19.2433; wildcard=false"
+
+    get '/search', :a => 3, :b => 4, :search => 'bar'
+    last_response.status.should == 400
+    last_response.body.should == %q(Request included unexpected parameters: a, b)
+  end
+  
+  it "should handle accept_no_params call" do
+    get '/users', :limit => 1
+    last_response.status.should == 400
+    last_response.body.should == %q(Request included unexpected parameter: limit)
+
+    get '/users'
+    last_response.status.should == 200
+  end
+  
+
+  it "should handle accept_only_id call" do
+    get '/posts/blarp'
+    last_response.status.should == 400
+    last_response.body.should == %q(Value for parameter 'id' (blarp) is of the wrong type (expected integer))
+
+    get '/posts/1'
     last_response.status.should == 200
   end
 end

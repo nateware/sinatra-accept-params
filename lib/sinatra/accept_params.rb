@@ -80,6 +80,7 @@ module Sinatra
       :integer => /^-?\d+$/,
       :float   => /^-?(\d*\.\d+|\d+)$/,
       :decimal => /^-?(\d*\.\d+|\d+)$/,
+      :boolean => /^(1|true|TRUE|T|Y|0|false|FALSE|F|N)$/,
       :datetime => /^[-\d:T\s]+$/,  # "T" is for ISO date format
     }
     
