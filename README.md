@@ -37,7 +37,7 @@ Example
         p.namespace :rating do |p|
           p.integer :user_id, :required => true, :minvalue => 1
           p.integer :rating,  :required => true
-          p.string  :comments, :process => Proc.new(value){ my_value_cleaner(value) }
+          p.string  :comments, :process => Proc.new(value){ my_value_cleaner(value) }  # return filtered value
         end
       end
   
